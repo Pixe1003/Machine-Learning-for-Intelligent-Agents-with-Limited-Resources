@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "majority-monitor"
+version = "0.1.0"
+description = "Learned memory-bounded monitors for the Majority Problem"
+authors = [{ name = "s2798452" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra -q"
+markers = [
+    "slow: long-running optimization smoke tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

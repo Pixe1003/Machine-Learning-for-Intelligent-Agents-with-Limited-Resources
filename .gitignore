@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (but keep directory structure via .gitkeep)
+results/csv/*.csv
+results/figures/*.png
+results/figures/*.pdf
+results/logs/*.log
+results/logs/*.jsonl
+!results/csv/.gitkeep
+!results/figures/.gitkeep
+!results/logs/.gitkeep
+
+# Model checkpoints
+*.pt
+*.pth
+checkpoints/
