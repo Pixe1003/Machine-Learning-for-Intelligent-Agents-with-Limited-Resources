@@ -4,6 +4,11 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from experiments.phase1_exploratory import main as run_phase1
 from experiments.phase2_core import main as run_phase2
 from experiments.phase3_stretch import main as run_phase3_main

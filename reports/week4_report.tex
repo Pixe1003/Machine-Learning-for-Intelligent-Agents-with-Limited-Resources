@@ -1,0 +1,197 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{siunitx}
+
+\graphicspath{
+  {../results/figures/phase1/summary/}
+  {../results/phase1_extended/figures/phase1_extended/summary/}
+  {results/figures/phase1/summary/}
+  {results/phase1_extended/figures/phase1_extended/summary/}
+}
+
+\title{Week 4 Progress Report\\
+\large Machine Learning for Intelligent Agents with Limited Resources}
+\author{s2798452}
+\date{Week 4: 27 April--3 May 2026}
+
+\begin{document}
+\maketitle
+
+\section{Summary}
+
+This week focused on closing the Week 4 static-monitor validation tasks. The
+main Phase 1 grid was completed for
+\[
+  (n,k) \in \{11,21\} \times \{2,3\},
+\]
+with all four static monitor classes M1--M4 trained using 20 restarts. In
+addition, a separate exhaustive-search validation was added for the small
+ground-truth case $(n=5,k=2)$, so that the exhaustive check does not contaminate
+the formal Phase 1 result table.
+
+The main outcome is that the gradient-based optimisation is reliable on the
+small ground-truth case: the relative gap between the learned M1 monitor and
+the exhaustive search optimum is approximately \SI{0.0134}{\percent}, far below
+the planned \SI{1}{\percent} acceptance threshold. I also added a lightweight
+extended grid, covering $n \in \{11,21,31\}$ and $k \in \{2,3,4\}$, to check
+whether the main qualitative pattern persists beyond the original four
+Phase 1 settings.
+
+\section{Completed Work}
+
+\begin{itemize}
+  \item Completed the Phase 1 static-monitor grid for M1, M2, M3, and M4.
+  \item Added a separate \texttt{phase1\_ground\_truth.csv} output for the
+  $(n=5,k=2)$ exhaustive validation.
+  \item Added a reproducible fallback rule: if the gradient--exhaustive relative
+  gap exceeds \SI{1}{\percent}, the run is retried with 30 restarts and a lower
+  learning rate; if it still fails, a GA cross-check is triggered.
+  \item Regenerated the Phase 1 summary figures, including more readable
+  grouped bar and relative-gap charts.
+  \item Ran a lightweight extended grid with 5 restarts per configuration to
+  make the result section richer without replacing the formal 20-restart Phase
+  1 table.
+\end{itemize}
+
+\section{Phase 1 Results}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\linewidth]{phase1_monitor_gap_bars.png}
+  \caption{Relative Phase 1 monitor gaps against M1. This bar chart is more
+  readable than the original error-curve plot because M1, M2, and M3 overlap
+  heavily in absolute error.}
+  \label{fig:phase1-monitor-gaps}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Best report-time error for each Phase 1 configuration.}
+  \label{tab:phase1-best}
+  \begin{tabular}{cccccc}
+    \toprule
+    $n$ & $k$ & Best class & $f_{\mathrm{report}}$ & Baseline improvement & M4 penalty vs M1 \\
+    \midrule
+    11 & 2 & M1 & 0.376953 & \SI{0.016}{\percent} & \SI{0.112}{\percent} \\
+    11 & 3 & M1 & 0.287656 & \SI{14.396}{\percent} & \SI{11.220}{\percent} \\
+    21 & 2 & M1 & 0.411901 & \SI{0.000}{\percent} & \SI{0.073}{\percent} \\
+    21 & 3 & M1 & 0.343148 & \SI{9.843}{\percent} & \SI{9.078}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The best-performing class is M1 in all four configurations. However, as shown
+in Figure~\ref{fig:phase1-monitor-gaps}, M2 is numerically almost identical to
+M1, indicating that soft acceptance does not provide a visible advantage on
+this grid. M3 also tracks M1 very closely: its relative penalty is below
+\SI{0.025}{\percent} in all cases. This supports the hypothesis that the best
+static monitors behave similarly to stochastic counters.
+
+The largest difference appears between M1 and M4 when $k=3$. For
+$(n=11,k=3)$, M4 is roughly \SI{11.22}{\percent} worse than M1; for
+$(n=21,k=3)$, it is roughly \SI{9.08}{\percent} worse. This suggests that the
+minimal counting parameterisation is too restrictive, while the richer
+state-dependent counting monitor M3 retains nearly all of the performance of
+the unconstrained M1 class.
+
+\section{Ground-Truth Validation}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Exhaustive-search validation for the small Week 4 ground-truth case.}
+  \label{tab:ground-truth}
+  \begin{tabular}{cccccc}
+    \toprule
+    $n$ & $k$ & Class & Gradient $f$ & Exhaustive $f^\star$ & Relative gap \\
+    \midrule
+    5 & 2 & M1 & 0.312542 & 0.312500 & \SI{0.0134}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The exhaustive validation passed. The relative gap is far below the
+\SI{1}{\percent} threshold, so no additional restart escalation or GA fallback
+was required for this case. This provides a useful sanity check that the
+gradient pipeline can recover a near-optimal solution at small scale.
+
+\section{Interpretation}
+
+The results give three useful signals for the next stage of the project. First,
+the optimisation pipeline appears stable: restart variance is effectively zero
+for M1--M3 on the current grid, and the exhaustive validation agrees with the
+gradient result. Second, the main structural hypothesis remains promising,
+because M3 is almost indistinguishable from M1 while using a much more
+interpretable counting-style parameterisation. Third, the benefit of increasing
+memory from $k=2$ to $k=3$ is substantial, especially relative to the baseline,
+whereas the simplest M4 monitor loses a noticeable amount of performance.
+
+\section{Exploratory Extension}
+
+To make the experimental evidence richer, I also ran a lightweight extended
+static grid with
+\[
+  n \in \{11,21,31\}, \qquad k \in \{2,3,4\},
+\]
+using 5 restarts per configuration. This is not intended to replace the formal
+20-restart Phase 1 table; rather, it provides an exploratory view of whether
+the same qualitative pattern persists when the memory budget increases.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{phase1_extended_monitor_gap_bars.png}
+  \caption{Relative monitor gaps in the lightweight extended grid. M3 remains
+  very close to M1 across the explored settings, while M4 loses substantial
+  performance for $k=3$ and $k=4$.}
+  \label{fig:phase1-extended-monitor-gaps}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Lightweight extended-grid summary. M3 remains close to M1, while M4
+  becomes substantially worse once $k \geq 3$.}
+  \label{tab:phase1-extended}
+  \begin{tabular}{ccccc}
+    \toprule
+    $n$ & $k$ & M1 $f_{\mathrm{report}}$ & M3 gap vs M1 & M4 gap vs M1 \\
+    \midrule
+    11 & 2 & 0.376953 & \SI{0.007}{\percent} & \SI{0.429}{\percent} \\
+    11 & 3 & 0.287657 & \SI{0.079}{\percent} & \SI{11.842}{\percent} \\
+    11 & 4 & 0.204141 & \SI{0.050}{\percent} & \SI{13.157}{\percent} \\
+    21 & 2 & 0.411901 & \SI{0.005}{\percent} & \SI{0.281}{\percent} \\
+    21 & 3 & 0.343149 & \SI{0.097}{\percent} & \SI{9.446}{\percent} \\
+    21 & 4 & 0.277657 & \SI{0.020}{\percent} & \SI{13.404}{\percent} \\
+    31 & 2 & 0.427768 & \SI{0.004}{\percent} & \SI{0.222}{\percent} \\
+    31 & 3 & 0.368525 & \SI{0.090}{\percent} & \SI{8.187}{\percent} \\
+    31 & 4 & 0.311980 & \SI{0.017}{\percent} & \SI{12.782}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The extended grid supports the same interpretation as the formal Phase 1 run:
+M3 remains within approximately \SI{0.1}{\percent} of M1, while M4 is roughly
+\SI{8}{\percent}--\SI{13}{\percent} worse than M1 when $k \geq 3$. This
+strengthens the evidence that state-dependent stochastic counting captures
+most of the useful structure of the unconstrained static monitor. The restart
+stability summary also shows that M1--M3 have effectively zero restart spread
+in most extended-grid settings; additional restarts mainly increase confidence
+in convergence rather than changing the best observed accuracy.
+
+\section{Next Steps}
+
+\begin{itemize}
+  \item Strengthen the GA cross-check for the harder $(n=21,k=3)$ M1 case,
+  since the current GA run remains worse than the gradient solution.
+  \item Package the static monitor code, tests, CSV outputs, and summary figures
+  for the Week 5 D1 deliverable.
+  \item Select the most informative extended-grid settings, especially $k=4$,
+  for a future full 20-restart confirmation run.
+  \item Begin preparing the Phase 2 dynamic-monitor experiments after the static
+  Phase 1 results are archived.
+\end{itemize}
+
+\end{document}

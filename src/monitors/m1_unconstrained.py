@@ -1,17 +1,8 @@
-"""
-M1: unconstrained row-stochastic (H, T) with hard acceptance F ⊆ {0,...,k-1}.
+"""M1-hard: unconstrained static monitor with hard report-time acceptance.
 
-Parametrisation
----------------
-    H = softmax(W_H, dim=-1)     W_H ∈ R^{k×k}
-    T = softmax(W_T, dim=-1)     W_T ∈ R^{k×k}
-    p(s) = σ(ω_s)                during training
-    p(s) ∈ {0, 1} (thresholded at 0.5)   at evaluation
-
-The softmax naturally enforces row-stochasticity; the hard-F discretisation
-is applied only in eval mode so the optimiser sees a smooth objective.
-
-Free parameters: 2 k(k-1) + 1  (hard F reduces to the accepting-subset size).
+The training objective keeps a soft sigmoid acceptance relaxation for
+optimisation.  `report_evaluate()` flips `hard_accept` on a deepcopy so reported
+results use a hard accepting set.
 """
 from __future__ import annotations
 
@@ -23,7 +14,7 @@ from torch import Tensor, nn
 from src.monitors.base import MonitorBase
 
 
-class M1Monitor(MonitorBase):
+class M1HardMonitor(MonitorBase):
     def __init__(self, k: int, init_scale: float = 0.1, dtype=None, device=None, seed: int | None = None):
         super().__init__(k=k, dtype=dtype if dtype is not None else torch.float64, device=device)
         if seed is not None:
@@ -42,9 +33,8 @@ class M1Monitor(MonitorBase):
 
         self.W_H = nn.Parameter(randn(k, k))
         self.W_T = nn.Parameter(randn(k, k))
-        # ω ∈ R^k; during training we return σ(ω).  At eval, we threshold.
         self.omega = nn.Parameter(randn(k))
-        self.hard_accept: bool = False  # flip to True at evaluation
+        self.hard_accept: bool = False
 
     def transitions(self, n: int) -> Tuple[Tensor, Tensor]:
         H = torch.softmax(self.W_H, dim=-1)
@@ -57,8 +47,8 @@ class M1Monitor(MonitorBase):
             p = (p >= 0.5).to(p.dtype)
         return p
 
-    def load_from_m2(self, m2: "M1Monitor") -> None:
-        """Warm-start from an M2 monitor (shares this parametrisation)."""
-        self.W_H.data.copy_(m2.W_H.data)
-        self.W_T.data.copy_(m2.W_T.data)
-        self.omega.data.copy_(m2.omega.data)
+    def load_from_m1(self, m1: "M1Monitor") -> None:
+        """Warm-start from an M1 monitor with the same unconstrained transitions."""
+        self.W_H.data.copy_(m1.W_H.data)
+        self.W_T.data.copy_(m1.W_T.data)
+        self.omega.data.copy_(m1.omega.data)

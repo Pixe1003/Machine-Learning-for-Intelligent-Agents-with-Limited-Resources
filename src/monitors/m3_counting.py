@@ -1,5 +1,5 @@
 """
-M3: counting-restricted, state-dependent {stay, move} transitions.
+M2: counting-restricted, state-dependent {stay, move} transitions.
 
 States are linearly ordered 0, 1, ..., k-1.
 On H observation, state s moves to s+1 with probability q_H(s), else stays.
@@ -19,7 +19,7 @@ from torch import Tensor, nn
 from src.monitors.base import MonitorBase
 
 
-class M3Monitor(MonitorBase):
+class M2Monitor(MonitorBase):
     def __init__(self, k: int, init_scale: float = 0.1, dtype=None, device=None, seed: int | None = None):
         super().__init__(k=k, dtype=dtype if dtype is not None else torch.float64, device=device)
         gen = torch.Generator(device=device if device is not None else "cpu")
@@ -70,9 +70,9 @@ class M3Monitor(MonitorBase):
         return torch.sigmoid(self.omega)
 
     @torch.no_grad()
-    def to_m1_warm_start(self, m1) -> None:
+    def to_unconstrained_warm_start(self, m1) -> None:
         """
-        Warm-start an M1 (or M2) monitor from this M3.
+        Warm-start an unconstrained M1 or M1-hard monitor from this M2.
         Embeds the tridiagonal (H, T) into full k×k logits.
         """
         H, T = self.transitions(n=1)

@@ -1,5 +1,5 @@
 """
-Genetic algorithm for M1 monitors.  Complements gradient descent by exploring
+Genetic algorithm for M1-hard monitors.  Complements gradient descent by exploring
 a broader region of parameter space and providing independent verification
 of f(n, k).  The best individual is optionally refined by a short gradient run.
 """
@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from src.core.loss import evaluate
-from src.monitors.m1_unconstrained import M1Monitor
+from src.monitors.m1_unconstrained import M1HardMonitor
 from src.optim.gradient import train_one
 
 
@@ -32,9 +32,9 @@ def _random_individual(k: int, rng: np.random.Generator, dirichlet_alpha: float 
     return Individual(W_H=W_H, W_T=W_T, omega=omega)
 
 
-def _to_monitor(ind: Individual, dtype=torch.float64) -> M1Monitor:
+def _to_monitor(ind: Individual, dtype=torch.float64) -> M1HardMonitor:
     k = ind.W_H.shape[0]
-    m = M1Monitor(k=k, dtype=dtype)
+    m = M1HardMonitor(k=k, dtype=dtype)
     eps = 1e-6
     with torch.no_grad():
         m.W_H.data.copy_(torch.tensor(np.log(np.clip(ind.W_H, eps, None)), dtype=dtype))
@@ -82,7 +82,7 @@ def run_ga(
     gradient_refine_steps: int = 100,
     seed: int = 0,
     verbose: bool = True,
-) -> Tuple[M1Monitor, float]:
+) -> Tuple[M1HardMonitor, float]:
     rng = np.random.default_rng(seed)
     pop = [_random_individual(k, rng) for _ in range(population_size)]
     for ind in pop:
