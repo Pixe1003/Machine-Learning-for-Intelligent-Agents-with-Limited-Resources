@@ -1,5 +1,5 @@
 """
-M4: minimal random walk with *state-independent* move probabilities.
+M3: minimal random walk with *state-independent* move probabilities.
 
 Two scalar parameters q_H, q_T — state s transitions to s+1 (on H) w.p. q_H
 *regardless of s*, and similarly for q_T.  This is the simplest non-trivial
@@ -17,7 +17,7 @@ from torch import Tensor, nn
 from src.monitors.base import MonitorBase
 
 
-class M4Monitor(MonitorBase):
+class M3Monitor(MonitorBase):
     def __init__(self, k: int, init_scale: float = 0.1, dtype=None, device=None, seed: int | None = None):
         super().__init__(k=k, dtype=dtype if dtype is not None else torch.float64, device=device)
         gen = torch.Generator(device=device if device is not None else "cpu")
@@ -59,8 +59,8 @@ class M4Monitor(MonitorBase):
         return torch.sigmoid(self.omega)
 
     @torch.no_grad()
-    def to_m3_warm_start(self, m3) -> None:
-        """Broadcast M4's two logits into M3's per-state logits."""
+    def to_m2_warm_start(self, m3) -> None:
+        """Broadcast M3's two logits into M2's per-state logits."""
         m3.logits_qH.data.fill_(self.logit_qH.item())
         m3.logits_qT.data.fill_(self.logit_qT.item())
         m3.omega.data.copy_(self.omega.data.clone())

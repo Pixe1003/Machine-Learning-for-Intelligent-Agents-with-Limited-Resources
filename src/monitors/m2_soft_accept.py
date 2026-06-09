@@ -1,9 +1,7 @@
-"""
-M2: unconstrained (H, T) with *soft* acceptance p(s) ∈ [0, 1] learned jointly.
+"""M1: unconstrained static monitor with soft acceptance.
 
-The transition parametrisation is identical to M1; only the acceptance rule
-differs (no hard-threshold discretisation).  This isolates Δ^acc = f_M2 - f_M1
-for hypothesis H5.
+This is the most general static monitor in the presentation hierarchy:
+row-stochastic H/T transitions and learned acceptance probabilities p(s).
 """
 from __future__ import annotations
 
@@ -15,7 +13,7 @@ from torch import Tensor, nn
 from src.monitors.base import MonitorBase
 
 
-class M2Monitor(MonitorBase):
+class M1Monitor(MonitorBase):
     def __init__(self, k: int, init_scale: float = 0.1, dtype=None, device=None, seed: int | None = None):
         super().__init__(k=k, dtype=dtype if dtype is not None else torch.float64, device=device)
         if seed is not None:

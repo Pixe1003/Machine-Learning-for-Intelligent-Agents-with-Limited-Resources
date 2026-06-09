@@ -14,6 +14,7 @@ def test_reproduce_pipeline_generates_csvs_and_figures(tmp_path: Path) -> None:
             "steps": 1,
             "run_ga": False,
             "run_exhaustive": False,
+            "run_ground_truth": False,
             "run_anneal": True,
             "generate_artifacts": True,
             "analysis_samples": 64,

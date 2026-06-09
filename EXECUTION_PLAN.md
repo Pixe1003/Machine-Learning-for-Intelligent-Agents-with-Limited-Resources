@@ -57,9 +57,9 @@
 
 ### Week 5（5/4–5/10）— T2/T4 收尾 + **M2 达成** + 交付 D1
 
-- [ ] M1/M2 warm-start from M3 optimum（代码已写好 `to_m1_warm_start`）
-- [ ] GA 在 (n=21, k=3, M1) 上独立验证 gradient 结果
-- [ ] 打包 **D1**：M1–M4 静态 codebase + `README.md` + `tests/` 全绿 + tag `v0.1`
+- [x] M2/M1 warm-start from M3 optimum（`M3Monitor.to_m2_warm_start` + `M2Monitor.to_unconstrained_warm_start`）
+- [x] GA 在 (n=21, k=3, M1) 上独立验证 gradient 结果（formal `results/csv/phase1.csv`: `M1.ga_f=0.3503653531261832`）
+- [x] 打包 **D1**：M1–M4 静态 codebase + `README.md` + `tests/` 全绿 + tag `v0.1`
 
 ### Week 6–8（5/11–5/31）— T5 Dynamic
 
@@ -104,7 +104,7 @@
 | `torch.softmax` on logits | monitors/*.py | 自然保证 row-stochastic |
 | Seed = 12345 + restart_idx | `src/optim/gradient.py` | 每次 restart 可复现 |
 | 早停 patience=500 | `train_one` | 避免在 plateau 上浪费 compute |
-| Warm-start hooks | `M3.to_m1_warm_start`, `M4.to_m3_warm_start` | 从简单类爬到复杂类 |
+| Warm-start hooks | `M3Monitor.to_m2_warm_start`, `M2Monitor.to_unconstrained_warm_start` | 从简单类爬到复杂类 |
 | Shared MLP dynamic | `SharedDynamicMonitor` | n=201 时参数数量脱钩 |
 
 ---
